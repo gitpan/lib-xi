@@ -3,7 +3,7 @@ use 5.008_001;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Carp        ();
 use Config      ();
@@ -26,9 +26,10 @@ sub lib::xi::INC {
 
     my @args = (@{ $self->{cpanm_opts} }, $file);
     print STDERR "[lib::xi] cpanm @args\n" if _VERBOSE;
-    system $^X, $CPANM_PATH, @args;
+    system($^X, $CPANM_PATH, @args) == 0
+        or Carp::croak("[lib::xi] Failed to exec `cpanm @args`");
 
-    foreach my $lib (@{ $self->{libs} }) {
+    foreach my $lib (@{ $self->{myinc} }) {
         if(open my $inh, '<', "$lib/$file") {
             $INC{$file} = "$lib/$file";
             return $inh;
@@ -47,22 +48,23 @@ sub import {
         $install_dir = File::Spec->rel2abs(shift @cpanm_opts);
     }
 
-    my @libs;
+    my @myinc;
 
     if($install_dir) {
-        @libs = (
+        @myinc = (
             "$install_dir/lib/perl5",
             "$install_dir/lib/perl5/$Config::Config{archname}",
         );
-        push @INC, @libs;
-        print STDERR "[lib::xi] add [@libs] to \@INC\n" if _VERBOSE;
+        push @INC, @myinc;
+        print STDERR "[lib::xi] add [@myinc] to \@INC\n" if _VERBOSE;
 
         unshift @cpanm_opts, '-l', $install_dir;
     }
 
+
     push @INC, $class->new(
         install_dir => $install_dir,
-        libs        => \@libs,
+        myinc       => $install_dir ? \@myinc : \@INC,
         cpanm_opts  => \@cpanm_opts,
     );
     return;
@@ -76,7 +78,7 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 0.01.
+This document describes lib::xi version 0.02.
 
 =head1 SYNOPSIS
 
