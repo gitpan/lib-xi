@@ -3,7 +3,7 @@ use 5.008_001;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use File::Which ();
 use Config      ();
@@ -11,7 +11,8 @@ use Config      ();
 sub cpanm_path {
     my($self) = @_;
     $self->{cpanm_path} ||= File::Which::which('cpanm')
-                            || $self->fatal('cpanm is not available');
+                            || die( '[' . ref($self) . ']'
+                                  . 'cpanm(1) is not available');
 }
 
 sub new {
@@ -19,22 +20,21 @@ sub new {
     return bless \%args, $class;
 }
 
-# must be fully-qualified; othewise implied ::INC.
+# must be fully-qualified; othewise implied main::INC.
 sub lib::xi::INC {
     my($self, $file) = @_;
 
-    my @args = (@{ $self->{cpanm_opts} }, $file);
-    system($^X, $self->cpanm_path, @args) == 0
-        or $self->fatal("Failed to exec `cpanm @args`");
-
-    foreach my $lib (@{ $self->{myinc} }) {
-        if(open my $inh, '<', "$lib/$file") {
-            $INC{$file} = "$lib/$file";
-            return $inh;
+    if(system($^X, $self->cpanm_path, @{ $self->{cpanm_opts} }, $file) == 0) {
+        foreach my $lib (@{ $self->{myinc} }) {
+            if(open my $inh, '<', "$lib/$file") {
+                $INC{$file} = "$lib/$file";
+                return $inh;
+            }
         }
     }
 
-    $self->fatal("Try to install $file via `cpanm @args` but failed");
+    # fall back to the normal error (Can't locate Foo.pm ...)
+    return;
 }
 
 sub import {
@@ -67,13 +67,6 @@ sub import {
     return;
 }
 
-sub fatal {
-    my($self, @messages) = @_;
-    require Carp;
-    my $class = ref($self) || $self;
-    Carp::croak("[$class] ", @messages);
-}
-
 1;
 __END__
 
@@ -83,15 +76,15 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 0.05.
+This document describes lib::xi version 0.06.
 
 =head1 SYNOPSIS
 
     # to install missing libaries automatically
     $ perl -Mlib::xi script.pl
 
-    # with cpanm's options
-    $ perl -Mlib::xi,-q script.pl
+    # with cpanm options
+    $ perl -Mlib::xi=-q script.pl
 
     # to install missing libaries to extlib/ (with cpanm -l extlib)
     $ perl -Mlib::xi=extlib script.pl
@@ -110,7 +103,7 @@ C<lib::xi> is a pragma to install missing libraries if and only if they are
 required.
 
 The mechanism is that when the perl interpreter cannot find a library required,
-this pragma try to install it with C<cpanm> and tell it to the interpreter.
+this pragma try to install it with C<cpanm(1)> and tell it to the interpreter.
 
 =head1 INTERFACE
 
@@ -120,11 +113,13 @@ this pragma try to install it with C<cpanm> and tell it to the interpreter.
 
 Setups the C<lib::xi> hook into C<@INC>.
 
-If C<$install_dir> is specified, it is used as the install directory as
+If I<$install_dir> is specified, it is used as the install directory as
 C<cpanm --local-lib $install_dir>, adding C<$install_dir/lib/perl5> to C<@INC>
 (i.e. C<use lib::xi 'extlib'> also means C<use lib 'extlib/lib/perl5'>).
 
-If the first argument starts C<->, it is regarded as C<@cpanm_opts>.
+If the first argument starts with C<->, it is regarded as C<@cpanm_opts>.
+
+I<@cpanm_opts> are passed to C<cpanm(1)>.
 
 See L<perlfunc/require> for the C<@INC> hook specification details.
 
