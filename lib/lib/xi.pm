@@ -1,18 +1,17 @@
 package lib::xi;
 use 5.008_001;
 use strict;
+use warnings FATAL => 'all';
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
-use Config ();
+use File::Which ();
+use Config      ();
 
 sub cpanm_path {
     my($self) = @_;
-    $self->{cpanm_path} ||= do {
-        require File::Which;
-        File::Which::which('cpanm')
+    $self->{cpanm_path} ||= File::Which::which('cpanm')
                             || $self->fatal('cpanm is not available');
-    };
 }
 
 sub new {
@@ -84,33 +83,33 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 0.04.
+This document describes lib::xi version 0.05.
 
 =head1 SYNOPSIS
 
-    # to install missing libaries
+    # to install missing libaries automatically
     $ perl -Mlib::xi script.pl
+
+    # with cpanm's options
+    $ perl -Mlib::xi,-q script.pl
 
     # to install missing libaries to extlib/ (with cpanm -l extlib)
     $ perl -Mlib::xi=extlib script.pl
 
-    # extlib with cpanm options
-    $ perl -Mlib::xi=extlib,-q script.pl
-
     # with cpanm options
-    $ perl -Mlib::xi=-L,extlib,-q script.pl
+    $ perl -Mlib::xi=extlib,-q script.pl
 
 =head1 DESCRIPTION
 
 When you execute a script found in, for example, C<gist>, you'll be annoyed
 at missing libraries and will install those libraries by hand with a CPAN
-client. We have repeated such a task but it violates the great virtue of
-Laziness.
+client. We have repeated such a task, which violates the great virtue of
+Laziness. Stop doing it! Make computers do it!
 
 C<lib::xi> is a pragma to install missing libraries if and only if they are
 required.
 
-The mechanism is that if perl interpreter cannot find the library to be loaded,
+The mechanism is that when the perl interpreter cannot find a library required,
 this pragma try to install it with C<cpanm> and tell it to the interpreter.
 
 =head1 INTERFACE
@@ -122,11 +121,12 @@ this pragma try to install it with C<cpanm> and tell it to the interpreter.
 Setups the C<lib::xi> hook into C<@INC>.
 
 If C<$install_dir> is specified, it is used as the install directory as
-C<cpanm --loca-lib $install_dir>.
+C<cpanm --local-lib $install_dir>, adding C<$install_dir/lib/perl5> to C<@INC>
+(i.e. C<use lib::xi 'extlib'> also means C<use lib 'extlib/lib/perl5'>).
 
 If the first argument starts C<->, it is regarded as C<@cpanm_opts>.
 
-See C<perldoc -f require> for the C<@INC> hook specification details.
+See L<perlfunc/require> for the C<@INC> hook specification details.
 
 =head1 DEPENDENCIES
 
