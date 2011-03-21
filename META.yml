@@ -17,6 +17,7 @@ module_name: lib::xi
 name: lib-xi
 no_index:
   directory:
+    - example
     - inc
     - t
     - xt
@@ -27,4 +28,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/gfx/p5-lib-xi.git
-version: 0.07
+version: 0.08
