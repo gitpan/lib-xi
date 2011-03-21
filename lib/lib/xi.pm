@@ -3,7 +3,7 @@ use 5.008_001;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use File::Which ();
 use Config      ();
@@ -51,10 +51,10 @@ sub import {
 
     if($install_dir) {
         @myinc = (
-            "$install_dir/lib/perl5",
             "$install_dir/lib/perl5/$Config::Config{archname}",
+            "$install_dir/lib/perl5",
         );
-        push @INC, @myinc;
+        unshift @INC, @myinc;
 
         unshift @cpanm_opts, '-l', $install_dir;
     }
@@ -76,7 +76,7 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 0.06.
+This document describes lib::xi version 0.07.
 
 =head1 SYNOPSIS
 
