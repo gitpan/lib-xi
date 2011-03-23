@@ -3,28 +3,25 @@ use 5.008_001;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
-use File::Which ();
 use Config      ();
-
-sub cpanm_path {
-    my($self) = @_;
-    $self->{cpanm_path} ||= File::Which::which('cpanm')
-                            || die( '[' . ref($self) . ']'
-                                  . 'cpanm(1) is not available');
-}
 
 sub new {
     my($class, %args) = @_;
     return bless \%args, $class;
 }
 
+sub cpanm_command {
+    my($self) = @_;
+    return('cpanm', @{ $self->{cpanm_opts} });
+}
+
 # must be fully-qualified; othewise implied main::INC.
 sub lib::xi::INC {
     my($self, $file) = @_;
 
-    if(system($^X, $self->cpanm_path, @{ $self->{cpanm_opts} }, $file) == 0) {
+    if(system($^X, '-S', $self->cpanm_command, $file) == 0) {
         foreach my $lib (@{ $self->{myinc} }) {
             if(open my $inh, '<', "$lib/$file") {
                 $INC{$file} = "$lib/$file";
@@ -83,7 +80,7 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 0.08.
+This document describes lib::xi version 0.09.
 
 =head1 SYNOPSIS
 
