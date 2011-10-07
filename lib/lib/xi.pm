@@ -3,9 +3,15 @@ use 5.008_001;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
-use Config      ();
+use Config ();
+
+# modules which dosn't exist in CPAN
+our %IGNORE = map { $_ => 1 } (
+    'Encode/ConfigLocal.pm',
+    'Devel/StackTraceFrame.pm',
+);
 
 sub new {
     my($class, %args) = @_;
@@ -21,6 +27,8 @@ sub cpanm_command {
 sub lib::xi::INC {
     my($self, $file) = @_;
 
+    return if $IGNORE{$file};
+
     if(system($^X, '-S', $self->cpanm_command, $file) == 0) {
         foreach my $lib (@{ $self->{myinc} }) {
             if(open my $inh, '<', "$lib/$file") {
@@ -30,7 +38,7 @@ sub lib::xi::INC {
         }
     }
 
-    # fall back to the normal error (Can't locate Foo.pm ...)
+    # fall back to the default behavior (Can't locate Foo.pm ...)
     return;
 }
 
@@ -80,7 +88,7 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 0.09.
+This document describes lib::xi version 0.10.
 
 =head1 SYNOPSIS
 
@@ -95,6 +103,9 @@ This document describes lib::xi version 0.09.
 
     # with cpanm options
     $ perl -Mlib::xi=extlib,-q script.pl
+
+    # with cpanm options via env
+    $ PERL_CPANM_OPT='-l extlib -q' perl -Mlib::xi script.pl
 
 =head1 DESCRIPTION
 
