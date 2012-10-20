@@ -3,7 +3,7 @@ use 5.008_001;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use Config ();
 
@@ -13,6 +13,7 @@ our $VERBOSE;
 our %IGNORE = map { $_ => 1 } (
     'Encode/ConfigLocal.pm',
     'Devel/StackTraceFrame.pm',
+    'Log/Agent.pm', # used in Storable.pm
 );
 
 sub new {
@@ -100,7 +101,7 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 0.12.
+This document describes lib::xi version 0.13.
 
 =head1 SYNOPSIS
 
