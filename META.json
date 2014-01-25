@@ -4,7 +4,7 @@
       "Fuji, Goro (gfx) <gfuji@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v0.9.0",
+   "generated_by" : "Minilla/v0.11.0",
    "license" : [
       "perl_5"
    ],
@@ -57,7 +57,7 @@
    "provides" : {
       "lib::xi" : {
          "file" : "lib/lib/xi.pm",
-         "version" : "1.02"
+         "version" : "1.03"
       }
    },
    "release_status" : "stable",
@@ -71,11 +71,11 @@
          "web" : "https://github.com/gfx/p5-lib-xi"
       }
    },
-   "version" : "1.02",
+   "version" : "1.03",
    "x_contributors" : [
       "Fuji Goro <fuji.goro@dena.jp>",
       "Fuji, Goro <g.psy.va@gmail.com>",
-      "Ben Booth <benwbooth@gmail.com>",
-      "Fuji, Goro <goro-fuji@cookpad.com>"
+      "Fuji, Goro <goro-fuji@cookpad.com>",
+      "Ben Booth <benwbooth@gmail.com>"
    ]
 }

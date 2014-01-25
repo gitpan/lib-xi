@@ -3,7 +3,7 @@ use 5.008_001;
 use strict;
 use warnings FATAL => 'all';
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use File::Spec ();
 use Config ();
@@ -32,7 +32,7 @@ sub run_perl {
           privlibexp    archlibexp
     )};
     my @non_std_inc = map { File::Spec->rel2abs($_) }
-                      grep { not $std_inc{$_} } @INC;
+                      grep { defined($_) && not $std_inc{$_} } @INC;
 
     system($^X, (map { "-I$_" } @non_std_inc), @args);
 }
@@ -58,7 +58,7 @@ sub lib::xi::INC {
         print STDERR "# COMMAND: @cmd\n";
     }
     if(run_perl('-S', @cmd) == 0) {
-        foreach my $lib (@{ $self->{myinc} }) {
+        foreach my $lib (grep {defined} @{ $self->{myinc} }) {
             if(open my $inh, '<', "$lib/$file") {
                 $INC{$file} = "$lib/$file";
                 return $inh;
@@ -118,7 +118,7 @@ lib::xi - Installs missing modules on demand
 
 =head1 VERSION
 
-This document describes lib::xi version 1.02.
+This document describes lib::xi version 1.03.
 
 =head1 SYNOPSIS
 
